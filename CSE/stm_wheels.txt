@@ -1,0 +1,251 @@
+d1   d2
+d3   d4
+
+
+1 1     front
+1 1    
+
+
+0  0    back
+0  0  
+
+
+1   0    right
+0   1    
+
+
+0   1     left
+1   0    
+
+
+1  0       right turn
+1  0      
+
+
+0  1        left turn
+0  1       
+
+
+
+1 X         right - front
+X 1        
+
+0 X        left - back 
+X 0
+
+X 1        left front
+1 X 
+
+X 0        right back
+0 X                  
+----------------------------------------------------------------------------------------------------------------------
+code:
+#include "mbed.h"
+
+Serial device(PA_9, PA_10);
+
+DigitalOut d1(LED1);
+DigitalOut d2(LED1);
+DigitalOut d3(LED1);
+DigitalOut d4(LED1);
+
+PwmOut  p1(LED2);
+PwmOut  p2(LED2);
+PwmOut  p3(LED2);
+PwmOut  p4(LED2);
+
+char arr[18];
+
+void directions(bool i,bool j,bool k,bool l)
+{
+    d1 = i;
+    d2 = j;
+    d3 = k;
+    d4 = l;
+}
+
+void speed(float k)
+{
+    p1.write(k);
+    p2.write(k);
+    p3.write(k);
+    p4.write(k);    
+}    
+
+void diag_sped(float k1, bool t)
+{
+    if (t)
+    {
+        p1.write(k1);
+        p2.write(0);
+        p3.write(0);
+        p4.write(k1);
+    }
+    else
+    {
+        p1.write(0);
+        p2.write(k1);
+        p3.write(k1);
+        p4.write(0);        
+    }        
+}
+float class_to_pwm(char a)
+{
+    if(a == '8' || a == '0')
+    return(1);
+    if (a == '7' || a == '1')
+    return(0.75);
+    if (a == '6' || a  == '2')
+    return(0.5);
+    if(a == '5' || a == '3')
+    return(0.25);
+    else
+    return(0);
+}
+
+int dir(char a)
+{
+    if (a == '8' || a == '7' || a == '6' || a == '5' || a == '4')
+    return(1);
+    else
+    return(0);
+} 
+    
+int main()
+{
+    //setup pwm
+    p1.period(1);
+    p2.period(1);
+    p3.period(1);
+    p4.period(1);
+    
+    directions(1,1,1,1);   //default front 
+    speed(0);      //rest
+    while(1)
+    {
+    //insert serial code
+    device.scanf("%17s", arr);   
+    //return arr
+    
+    if (arr[0] == '1')
+    {
+     //perform action for SELECT   
+    }   
+    if (arr[1] == '1')
+    {
+        //perform action for START
+    }   
+    
+    if (arr[2] == '1')
+    {
+        directions(1,1,1,1);
+        speed(0.5);    //perform action for UP
+    }   
+    
+    if (arr[3] == '1')
+{
+    directions(1,0,1,0);
+    speed(0.8);    //perform action for RIGHT   
+}   
+    
+    if (arr[4] == '1')
+{
+    directions(0,0,0,0);
+    speed(0.5);    //perform action for DOWN   
+}            
+    if (arr[5] == '1')
+{
+    directions(0,1,0,1);
+    speed(0.8);    //perform action for LEFT
+}   
+if (arr[6] == '1')
+    {
+     directions(0,0,0,0);
+     diag_sped(0.5,1);
+     //perform action for LEFT_2   
+    }   
+    
+    if (arr[7] == '1')
+    {
+     directions(0,0,0,0);
+     diag_sped(0.5,0);
+        //perform action for RIGHT_2
+    }   
+    
+    if (arr[8] == '1')
+    {
+        //perform action for LEFT_1
+        directions(1,1,1,1);
+        diag_sped(0.5,0);
+    }        
+    
+    if (arr[9] == '1')
+    {
+        directions(1,1,1,1);//perform action for RIGHT_1
+        diag_sped(0.5,1);
+    }   
+    
+    if (arr[10] == '1')
+    {
+        //perform action for TRIANGLE
+    }   
+    
+    if (arr[11] == '1')
+    {
+        //perform action for CIRCLE
+    }   
+    
+    if (arr[12] == '1')
+    {
+        //perform action for CROSS
+    }   
+    
+    if (arr[13] == '1')
+    {
+        //perform action for SQUARE
+    }   
+    
+    if (arr[14] != '4')
+    {
+        if(dir(arr[17]))
+        {
+        directions(0,1,1,0);
+        speed(class_to_pwm(arr[14]));//perform action for LEFT - X - JOYSTICK
+        }
+        else
+        {
+        directions(1,0,0,1);
+        speed(class_to_pwm(arr[14]));    
+        }     
+        
+    }   
+    
+    if (arr[15] == '4')
+    {
+        //perform action for LEFT - Y - JOYSTICK
+    }   
+    
+    if (arr[16] == '4')
+    {
+        //perform action for RIGHT - X - JOYSTICK
+    }   
+    
+    if (arr[17] != '4')
+    {
+        if(dir(arr[17]))
+        {
+        directions(1,1,1,1); //perform action for RIGHT - Y - JOYSTICK
+        speed(class_to_pwm(arr[17]));
+        }
+        else
+        {
+        directions(0,0,0,0);
+        speed(class_to_pwm(arr[17]));    
+        }   
+    }
+    else
+    {
+        speed(0);
+    }   
+}
+}     
